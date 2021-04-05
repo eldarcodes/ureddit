@@ -1,18 +1,25 @@
 import { MikroORM } from "@mikro-orm/core";
 import { __prod__ } from "./constants";
-import { Post } from "./entities/Post";
 import mikroConfig from "./mikro-orm.config";
+import Express from "express";
+import colors from "colors";
+
+const PORT = process.env.PORT || 4000;
 
 const bootstrap = async () => {
   const orm = await MikroORM.init(mikroConfig);
-  console.log("db conn");
   await orm.getMigrator().up();
-  //   const post = orm.em.create(Post, { title: "first post" });
-  //   await orm.em.persistAndFlush(post);
 
-  const posts = await orm.em.find(Post, {});
+  const app = Express();
 
-  console.log(posts);
+  app.get("/", (_, res) => {
+    res.send("it works");
+  });
+
+  app.listen(PORT, () => {
+    console.log(colors.green(`[server] - http://localhost:${PORT}`));
+    console.log(colors.magenta(`[graphql] - http://localhost:${PORT}/graphql`));
+  });
 };
 
 bootstrap().catch((error) => {
