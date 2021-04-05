@@ -3,6 +3,7 @@ import { __prod__ } from "./constants";
 import mikroConfig from "./mikro-orm.config";
 import Express from "express";
 import colors from "colors";
+import cors from "cors";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/Hello";
@@ -14,6 +15,7 @@ const bootstrap = async () => {
   await orm.getMigrator().up();
 
   const app = Express();
+  app.use(cors());
 
   const schema = await buildSchema({
     resolvers: [HelloResolver],

@@ -13,6 +13,7 @@
     "dev": "nodemon dist/index.js"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
     "@types/node": "^14.14.37",
     "colors": "^1.4.0",
@@ -26,6 +27,7 @@
     "@mikro-orm/migrations": "^4.5.1",
     "@mikro-orm/postgresql": "^4.5.1",
     "apollo-server-express": "^2.22.2",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "graphql": "^15.5.0",
     "pg": "^8.5.1",
