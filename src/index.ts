@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { MikroORM } from "@mikro-orm/core";
 import { __prod__ } from "./constants";
 import mikroConfig from "./mikro-orm.config";
@@ -7,6 +8,8 @@ import cors from "cors";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/Hello";
+import { PostResolver } from "./resolvers/Post";
+import { MyContext } from "./types";
 
 const PORT = process.env.PORT || 4000;
 
@@ -18,12 +21,13 @@ const bootstrap = async () => {
   app.use(cors());
 
   const schema = await buildSchema({
-    resolvers: [HelloResolver],
+    resolvers: [HelloResolver, PostResolver],
     validate: false,
   });
 
   const apolloServer = new ApolloServer({
     schema,
+    context: (): MyContext => ({ em: orm.em }),
   });
 
   apolloServer.applyMiddleware({ app });
