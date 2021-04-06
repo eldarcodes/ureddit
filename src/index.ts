@@ -7,9 +7,11 @@ import colors from "colors";
 import cors from "cors";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
+import { MyContext } from "./types";
+
 import { HelloResolver } from "./resolvers/Hello";
 import { PostResolver } from "./resolvers/Post";
-import { MyContext } from "./types";
+import { UserResolver } from "./resolvers/User";
 
 const PORT = process.env.PORT || 4000;
 
@@ -21,7 +23,7 @@ const bootstrap = async () => {
   app.use(cors());
 
   const schema = await buildSchema({
-    resolvers: [HelloResolver, PostResolver],
+    resolvers: [HelloResolver, PostResolver, UserResolver],
     validate: false,
   });
 
