@@ -40,18 +40,57 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
-  @Mutation(() => User)
+  @Mutation(() => UserResponse)
   async register(
     @Arg("options", () => UsernamePasswordInput) options: UsernamePasswordInput,
     @Ctx() { em }: MyContext
-  ): Promise<User | null> {
+  ): Promise<UserResponse> {
     const { username, password } = options;
+
+    if (username.length <= 3) {
+      return {
+        errors: [
+          {
+            field: "username",
+            message: "username length must be greater than 3",
+          },
+        ],
+      };
+    }
+
+    if (password.length <= 4) {
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "password length must be greater than 4",
+          },
+        ],
+      };
+    }
 
     const hashedPassword = await hash(password);
     const user = em.create(User, { username, password: hashedPassword });
-    await em.persistAndFlush(user);
 
-    return user;
+    try {
+      await em.persistAndFlush(user);
+    } catch (error) {
+      const isUsernameTaken = error.code === "23505";
+
+      if (isUsernameTaken) {
+        return {
+          errors: [
+            {
+              field: "username",
+              message: "username already taken",
+            },
+          ],
+        };
+      }
+      console.error(error);
+    }
+
+    return { user };
   }
 
   @Mutation(() => UserResponse)
@@ -60,6 +99,7 @@ export class UserResolver {
     @Ctx() { em }: MyContext
   ): Promise<UserResponse> {
     const { username, password } = options;
+
     const user = await em.findOne(User, { username });
 
     if (!user) {
