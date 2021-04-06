@@ -11,7 +11,8 @@
     "dev:node": "nodemon --exec ts-node src/index.ts",
     "start:main": "node dist/index.js",
     "dev:main": "nodemon dist/index.js",
-    "dev": "concurrently --kill-others \"yarn dev:main\" \"yarn watch\""
+    "dev": "concurrently --kill-others \"yarn dev:main\" \"yarn watch\"",
+    "create:migration": "mikro-orm migration:create"
   },
   "devDependencies": {
     "@types/cors": "^2.8.10",
