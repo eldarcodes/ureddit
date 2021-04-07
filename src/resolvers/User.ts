@@ -11,6 +11,12 @@ import {
 import { User } from "./../entities/User";
 import { hash, verify } from "argon2";
 
+declare module "express-session" {
+  export interface SessionData {
+    user: { [key: string]: any };
+  }
+}
+
 @InputType()
 class UsernamePasswordInput {
   @Field()
@@ -96,7 +102,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Arg("options", () => UsernamePasswordInput) options: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const { username, password } = options;
 
@@ -127,6 +133,8 @@ export class UserResolver {
     }
 
     await em.persistAndFlush(user);
+
+    req.session.userId = user.id;
 
     return { user };
   }
