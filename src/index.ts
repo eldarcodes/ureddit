@@ -7,9 +7,14 @@ import colors from "colors";
 import cors from "cors";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
+import { MyContext } from "./types";
+
 import { HelloResolver } from "./resolvers/Hello";
 import { PostResolver } from "./resolvers/Post";
-import { MyContext } from "./types";
+import { UserResolver } from "./resolvers/User";
+import session from "express-session";
+import connectRedis from "connect-redis";
+import redis from "redis";
 
 const PORT = process.env.PORT || 4000;
 
@@ -18,16 +23,38 @@ const bootstrap = async () => {
   await orm.getMigrator().up();
 
   const app = Express();
+
+  const RedisStore = connectRedis(session);
+  const redisClient = redis.createClient();
+
   app.use(cors());
+  app.use(
+    session({
+      name: "jid", // cookie name
+      store: new RedisStore({
+        client: redisClient,
+        disableTouch: true,
+        disableTTL: true,
+      }),
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
+        httpOnly: true,
+        // secure: true,
+        sameSite: "lax",
+      },
+      secret: "06042021_redis_session_secret",
+      resave: false,
+    })
+  );
 
   const schema = await buildSchema({
-    resolvers: [HelloResolver, PostResolver],
+    resolvers: [HelloResolver, PostResolver, UserResolver],
     validate: false,
   });
 
   const apolloServer = new ApolloServer({
     schema,
-    context: (): MyContext => ({ em: orm.em }),
+    context: ({ req, res }): MyContext => ({ em: orm.em, req, res }),
   });
 
   apolloServer.applyMiddleware({ app });
