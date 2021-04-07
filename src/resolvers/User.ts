@@ -6,16 +6,11 @@ import {
   InputType,
   Mutation,
   ObjectType,
+  Query,
   Resolver,
 } from "type-graphql";
 import { User } from "./../entities/User";
 import { hash, verify } from "argon2";
-
-declare module "express-session" {
-  export interface SessionData {
-    user: { [key: string]: any };
-  }
-}
 
 @InputType()
 class UsernamePasswordInput {
@@ -137,5 +132,16 @@ export class UserResolver {
     req.session.userId = user.id;
 
     return { user };
+  }
+
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { req, em }: MyContext): Promise<User | null> {
+    if (!req.session.userId) {
+      return null;
+    }
+
+    const user = await em.findOne(User, { id: req.session.userId });
+
+    return user;
   }
 }
