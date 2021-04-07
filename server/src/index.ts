@@ -27,7 +27,12 @@ const bootstrap = async () => {
   const RedisStore = connectRedis(session);
   const redisClient = redis.createClient();
 
-  app.use(cors());
+  app.use(
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true,
+    })
+  );
   app.use(
     session({
       name: "jid", // cookie name
@@ -57,7 +62,7 @@ const bootstrap = async () => {
     context: ({ req, res }): MyContext => ({ em: orm.em, req, res }),
   });
 
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({ app, cors: false });
 
   app.listen(PORT, () => {
     console.log(colors.green(`[server] - http://localhost:${PORT}`));
