@@ -44,7 +44,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async register(
     @Arg("options", () => UsernamePasswordInput) options: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const { username, password } = options;
 
@@ -90,6 +90,8 @@ export class UserResolver {
       }
       console.error(error);
     }
+
+    req.session.userId = user.id;
 
     return { user };
   }
