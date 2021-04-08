@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { MikroORM } from "@mikro-orm/core";
-import { __prod__ } from "./constants";
+import { COOKIE_NAME, __prod__ } from "./constants";
 import mikroConfig from "./mikro-orm.config";
 import Express from "express";
 import colors from "colors";
@@ -35,7 +35,7 @@ const bootstrap = async () => {
   );
   app.use(
     session({
-      name: "jid", // cookie name
+      name: COOKIE_NAME, // cookie name
       store: new RedisStore({
         client: redisClient,
         disableTouch: true,
