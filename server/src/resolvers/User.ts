@@ -9,8 +9,9 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
-import { User } from "./../entities/User";
+import { User } from "../entities/User";
 import { hash, verify } from "argon2";
+import { EntityManager } from "@mikro-orm/postgresql";
 
 @InputType()
 class UsernamePasswordInput {
@@ -71,10 +72,19 @@ export class UserResolver {
     }
 
     const hashedPassword = await hash(password);
-    const user = em.create(User, { username, password: hashedPassword });
-
+    let user;
     try {
-      await em.persistAndFlush(user);
+      const result = await (em as EntityManager)
+        .createQueryBuilder(User)
+        .getKnexQuery()
+        .insert({
+          username,
+          password: hashedPassword,
+          created_at: new Date(),
+          updated_at: new Date(),
+        })
+        .returning("*");
+      user = result[0];
     } catch (error) {
       const isUsernameTaken = error.code === "23505";
 
