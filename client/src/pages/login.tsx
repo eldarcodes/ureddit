@@ -1,11 +1,12 @@
 import React from "react";
 import { Form, Formik, FormikHelpers } from "formik";
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, Flex } from "@chakra-ui/react";
 import { Wrapper } from "../components/Wrapper";
 import { InputField } from "../components/InputField";
 import { useLoginMutation } from "./../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
+import NextLink from "next/link";
 
 type Values = {
   username: string;
@@ -51,14 +52,20 @@ const Login: React.FC<{}> = () => {
                 type="password"
               />
             </Box>
-            <Button
-              mt={5}
-              isLoading={isSubmitting}
-              type="submit"
-              colorScheme="teal"
-            >
-              login
-            </Button>
+
+            <Flex mt={5}>
+              <Button
+                mr={3}
+                isLoading={isSubmitting}
+                type="submit"
+                colorScheme="teal"
+              >
+                login
+              </Button>
+              <NextLink href="/">
+                <Button>back</Button>
+              </NextLink>
+            </Flex>
           </Form>
         )}
       </Formik>

@@ -1,11 +1,12 @@
 import React from "react";
 import { Form, Formik, FormikHelpers } from "formik";
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, Flex } from "@chakra-ui/react";
 import { Wrapper } from "../components/Wrapper";
 import { InputField } from "../components/InputField";
 import { useRegisterMutation } from "./../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
+import NextLink from "next/link";
 
 interface RegisterProps {}
 type Values = {
@@ -52,14 +53,19 @@ const Register: React.FC<RegisterProps> = () => {
                 type="password"
               />
             </Box>
-            <Button
-              mt={5}
-              isLoading={isSubmitting}
-              type="submit"
-              colorScheme="teal"
-            >
-              register
-            </Button>
+            <Flex mt={5}>
+              <Button
+                mr={3}
+                isLoading={isSubmitting}
+                type="submit"
+                colorScheme="teal"
+              >
+                register
+              </Button>
+              <NextLink href="/">
+                <Button>back</Button>
+              </NextLink>
+            </Flex>
           </Form>
         )}
       </Formik>
