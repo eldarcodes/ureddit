@@ -1,6 +1,6 @@
 import React from "react";
 import { Form, Formik, FormikHelpers } from "formik";
-import { Box, Button, Flex } from "@chakra-ui/react";
+import { Box, Button, Flex, Link } from "@chakra-ui/react";
 import { Wrapper } from "../components/Wrapper";
 import { InputField } from "../components/InputField";
 import { useLoginMutation } from "./../generated/graphql";
@@ -11,7 +11,7 @@ import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 
 type Values = {
-  username: string;
+  usernameOrEmail: string;
   password: string;
 };
 
@@ -24,7 +24,7 @@ const Login: React.FC<{}> = () => {
     values: Values,
     { setErrors }: FormikHelpers<Values>
   ) => {
-    const response = await login({ options: values });
+    const response = await login(values);
     const errors = response.data?.login.errors;
     if (errors) {
       setErrors(toErrorMap(errors));
@@ -36,15 +36,15 @@ const Login: React.FC<{}> = () => {
   return (
     <Wrapper>
       <Formik
-        initialValues={{ username: "", password: "" }}
+        initialValues={{ usernameOrEmail: "", password: "" }}
         onSubmit={handleSubmit}
       >
         {({ isSubmitting }) => (
           <Form>
             <InputField
-              name="username"
-              placeholder="username"
-              label="Username"
+              name="usernameOrEmail"
+              placeholder="Username or email"
+              label="Username or email"
             />
             <Box mt={5}>
               <InputField
@@ -54,8 +54,14 @@ const Login: React.FC<{}> = () => {
                 type="password"
               />
             </Box>
-
-            <Flex mt={5}>
+            <Flex mb={5} mt={2}>
+              <NextLink href="/forgot-password">
+                <Link ml="auto" color="gray">
+                  forgot password?
+                </Link>
+              </NextLink>
+            </Flex>
+            <Flex>
               <Button
                 mr={3}
                 isLoading={isSubmitting}
