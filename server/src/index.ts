@@ -15,14 +15,13 @@ import { UserResolver } from "./resolvers/User";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import redis from "redis";
-import { sendEmail } from "./utils/sendEmail";
 
 const PORT = process.env.PORT || 4000;
 
 const bootstrap = async () => {
-  sendEmail("bob@bob.com", "hello!");
   const orm = await MikroORM.init(mikroConfig);
-  await orm.getMigrator().up();
+  const migrator = orm.getMigrator();
+  await migrator.up();
 
   const app = Express();
 
