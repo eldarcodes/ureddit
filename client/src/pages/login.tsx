@@ -54,8 +54,14 @@ const Login: React.FC<{}> = () => {
                 type="password"
               />
             </Box>
-
-            <Flex mt={5} align="center">
+            <Flex mb={5} mt={2}>
+              <NextLink href="/forgot-password">
+                <Link ml="auto" color="gray">
+                  forgot password?
+                </Link>
+              </NextLink>
+            </Flex>
+            <Flex>
               <Button
                 mr={3}
                 isLoading={isSubmitting}
@@ -65,10 +71,7 @@ const Login: React.FC<{}> = () => {
                 login
               </Button>
               <NextLink href="/">
-                <Button mr={3}>back</Button>
-              </NextLink>
-              <NextLink href="/forgot-password">
-                <Link color="gray">forgot password</Link>
+                <Button>back</Button>
               </NextLink>
             </Flex>
           </Form>
