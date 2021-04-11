@@ -113,6 +113,8 @@ export class UserResolver {
 
     req.session.userId = user.id;
 
+    await redis.del(FORGET_PASSWORD_PREFIX + token);
+
     return { user };
   }
 
