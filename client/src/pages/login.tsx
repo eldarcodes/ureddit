@@ -11,7 +11,7 @@ import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 
 type Values = {
-  username: string;
+  usernameOrEmail: string;
   password: string;
 };
 
@@ -24,7 +24,7 @@ const Login: React.FC<{}> = () => {
     values: Values,
     { setErrors }: FormikHelpers<Values>
   ) => {
-    const response = await login({ options: values });
+    const response = await login(values);
     const errors = response.data?.login.errors;
     if (errors) {
       setErrors(toErrorMap(errors));
@@ -36,15 +36,15 @@ const Login: React.FC<{}> = () => {
   return (
     <Wrapper>
       <Formik
-        initialValues={{ username: "", password: "" }}
+        initialValues={{ usernameOrEmail: "", password: "" }}
         onSubmit={handleSubmit}
       >
         {({ isSubmitting }) => (
           <Form>
             <InputField
-              name="username"
-              placeholder="username"
-              label="Username"
+              name="usernameOrEmail"
+              placeholder="Username or email"
+              label="Username or email"
             />
             <Box mt={5}>
               <InputField
