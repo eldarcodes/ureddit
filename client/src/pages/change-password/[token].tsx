@@ -14,7 +14,7 @@ interface Values {
   newPassword: string;
 }
 
-const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
+const ChangePassword: React.FC = () => {
   const [tokenError, setTokenError] = useState("");
 
   const [, changePassword] = useChangePasswordMutation();
@@ -26,7 +26,7 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
   ) => {
     const response = await changePassword({
       newPassword: values.newPassword,
-      token,
+      token: typeof router.query.token === "string" ? router.query.token : "",
     });
     const errors = response.data?.changePassword.errors;
     if (errors) {
@@ -76,12 +76,6 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
       </Formik>
     </Wrapper>
   );
-};
-
-ChangePassword.getInitialProps = ({ query }) => {
-  return {
-    token: query.token as string,
-  };
 };
 
 export default withUrqlClient(createUrqlClient)(ChangePassword as any);

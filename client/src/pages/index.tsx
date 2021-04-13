@@ -4,7 +4,7 @@ import { NavBar } from "../components/NavBar";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { usePostsQuery } from "./../generated/graphql";
 import NextLink from "next/link";
-import { Link } from "@chakra-ui/react";
+import { Button, Link } from "@chakra-ui/react";
 import { Layout } from "../components/Layout";
 
 const Index = () => {
@@ -12,7 +12,7 @@ const Index = () => {
   return (
     <Layout variant="regular">
       <NextLink href="/create-post">
-        <Link>create post</Link>
+        <Button>create post</Button>
       </NextLink>
       {!data ? (
         <div>loading...</div>
