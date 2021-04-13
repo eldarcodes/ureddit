@@ -1,4 +1,9 @@
-import { dedupExchange, Exchange, fetchExchange } from "urql";
+import {
+  dedupExchange,
+  Exchange,
+  fetchExchange,
+  stringifyVariables,
+} from "urql";
 import {
   LogoutMutation,
   MeQuery,
@@ -23,7 +28,7 @@ export const errorExchange: Exchange = ({ forward }) => (ops$) => {
 };
 
 export const cursorPagination = (): Resolver => {
-  return (_parent, _, cache, info) => {
+  return (_parent, fieldArgs, cache, info) => {
     const { parentKey: entityKey, fieldName } = info;
 
     const allFields = cache.inspectFields(entityKey);
@@ -32,6 +37,11 @@ export const cursorPagination = (): Resolver => {
     if (size === 0) {
       return undefined;
     }
+
+    const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
+    const isInCache = cache.resolve(entityKey, fieldKey);
+
+    info.partial = !isInCache;
 
     const results: string[] = [];
     fieldInfos.forEach((fi) => {
