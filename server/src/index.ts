@@ -16,19 +16,22 @@ import Redis from "ioredis";
 import { createConnection } from "typeorm";
 import { User } from "./entities/User";
 import { Post } from "./entities/Post";
+import path from "path";
 
 const PORT = process.env.PORT || 4000;
 
 const bootstrap = async () => {
-  await createConnection({
+  const conn = await createConnection({
     type: "postgres",
     database: "ureddit2",
     username: "mirzabekov",
     password: "eldar",
+    migrations: [path.join(__dirname, "./migrations/*")],
     logging: true,
     synchronize: true,
     entities: [Post, User],
   });
+  await conn.runMigrations();
 
   const app = Express();
 
