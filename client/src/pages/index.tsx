@@ -8,7 +8,7 @@ import { usePostsQuery } from "./../generated/graphql";
 
 const Index = () => {
   const [variables, setVariables] = useState({
-    limit: 5,
+    limit: 33,
     cursor: null as null | string,
   });
 
@@ -33,7 +33,7 @@ const Index = () => {
         <div>loading...</div>
       ) : (
         <Stack spacing={4}>
-          {data!.posts.map((post) => (
+          {data!.posts.posts.map((post) => (
             <Box shadow="sm" borderWidth="1px" p={5} key={post.id}>
               <Heading fontSize="xl">{post.title}</Heading>
               <Text>{post.textSnippet}</Text>
@@ -41,20 +41,23 @@ const Index = () => {
           ))}
         </Stack>
       )}
-      <Box textAlign="center">
-        <Button
-          isLoading={fetching}
-          onClick={() => {
-            setVariables({
-              limit: variables.limit,
-              cursor: data!.posts[data!.posts.length - 1].createdAt,
-            });
-          }}
-          my={4}
-        >
-          load more
-        </Button>
-      </Box>
+      {data && data.posts.hasMore ? (
+        <Box textAlign="center">
+          <Button
+            isLoading={fetching}
+            onClick={() => {
+              setVariables({
+                limit: variables.limit,
+                cursor: data!.posts.posts[data!.posts.posts.length - 1]
+                  .createdAt,
+              });
+            }}
+            my={4}
+          >
+            load more
+          </Button>
+        </Box>
+      ) : null}
     </Layout>
   );
 };
