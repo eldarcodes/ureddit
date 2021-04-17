@@ -1,7 +1,5 @@
 import "reflect-metadata";
-import { MikroORM } from "@mikro-orm/core";
 import { COOKIE_NAME, __prod__ } from "./constants";
-import mikroConfig from "./mikro-orm.config";
 import Express from "express";
 import colors from "colors";
 import cors from "cors";
@@ -14,18 +12,31 @@ import { PostResolver } from "./resolvers/Post";
 import { UserResolver } from "./resolvers/User";
 import session from "express-session";
 import connectRedis from "connect-redis";
-import redis from "redis";
+import Redis from "ioredis";
+import { createConnection } from "typeorm";
+import { User } from "./entities/User";
+import { Post } from "./entities/Post";
+import path from "path";
 
 const PORT = process.env.PORT || 4000;
 
 const bootstrap = async () => {
-  const orm = await MikroORM.init(mikroConfig);
-  await orm.getMigrator().up();
+  const conn = await createConnection({
+    type: "postgres",
+    database: "ureddit2",
+    username: "mirzabekov",
+    password: "eldar",
+    migrations: [path.join(__dirname, "./migrations/*")],
+    logging: true,
+    synchronize: true,
+    entities: [Post, User],
+  });
+  await conn.runMigrations();
 
   const app = Express();
 
   const RedisStore = connectRedis(session);
-  const redisClient = redis.createClient();
+  const redis = new Redis();
 
   app.use(
     cors({
@@ -37,7 +48,7 @@ const bootstrap = async () => {
     session({
       name: COOKIE_NAME, // cookie name
       store: new RedisStore({
-        client: redisClient,
+        client: redis,
         disableTouch: true,
         disableTTL: true,
       }),
@@ -59,7 +70,7 @@ const bootstrap = async () => {
 
   const apolloServer = new ApolloServer({
     schema,
-    context: ({ req, res }): MyContext => ({ em: orm.em, req, res }),
+    context: ({ req, res }): MyContext => ({ req, res, redis }),
   });
 
   apolloServer.applyMiddleware({ app, cors: false });

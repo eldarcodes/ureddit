@@ -3,25 +3,21 @@ import {
   Arg,
   Ctx,
   Field,
-  InputType,
+  FieldResolver,
   Mutation,
   ObjectType,
   Query,
   Resolver,
+  Root,
 } from "type-graphql";
 import { User } from "../entities/User";
 import { hash, verify } from "argon2";
-import { EntityManager } from "@mikro-orm/postgresql";
-import { COOKIE_NAME } from "../constants";
-
-@InputType()
-class UsernamePasswordInput {
-  @Field()
-  username: string;
-
-  @Field()
-  password: string;
-}
+import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from "../constants";
+import { UsernamePasswordInput } from "../utils/UsernamePasswordInput";
+import { validateRegister } from "../utils/validateRegister";
+import { sendEmail } from "../utils/sendEmail";
+import { v4 } from "uuid";
+import { getConnection } from "typeorm";
 
 @ObjectType()
 class FieldError {
@@ -41,52 +37,131 @@ class UserResponse {
   user?: User;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
-  @Mutation(() => UserResponse)
-  async register(
-    @Arg("options", () => UsernamePasswordInput) options: UsernamePasswordInput,
-    @Ctx() { em, req }: MyContext
-  ): Promise<UserResponse> {
-    const { username, password } = options;
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Arg("email") email: string,
+    @Ctx() { redis }: MyContext
+  ) {
+    const user = await User.findOne({ where: { email } });
 
-    if (username.length <= 3) {
-      return {
-        errors: [
-          {
-            field: "username",
-            message: "username length must be greater than 3",
-          },
-        ],
-      };
+    if (!user) {
+      // email is not in db
+      return true;
     }
 
-    if (password.length <= 4) {
+    const token = v4();
+
+    await redis.set(
+      FORGET_PASSWORD_PREFIX + token,
+      user.id,
+      "ex",
+      1000 * 60 * 60 * 24 * 3
+    ); // 3 days
+
+    await sendEmail(
+      email,
+      `<a href="http://localhost:3000/change-password/${token}">reset password</a>`
+    );
+
+    return true;
+  }
+
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() { req }: MyContext) {
+    if (req.session.userId === user.id) {
+      return user.email;
+    }
+    return "";
+  }
+
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Arg("token") token: string,
+    @Arg("newPassword") newPassword: string,
+    @Ctx() { redis, req }: MyContext
+  ): Promise<UserResponse> {
+    if (newPassword.length <= 4) {
       return {
         errors: [
           {
-            field: "password",
+            field: "newPassword",
             message: "password length must be greater than 4",
           },
         ],
       };
     }
 
+    const userId = await redis.get(FORGET_PASSWORD_PREFIX + token);
+    if (!userId) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "token expired",
+          },
+        ],
+      };
+    }
+
+    const userIdNum = parseInt(userId);
+
+    const user = await User.findOne(userIdNum);
+
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "user no longer exists",
+          },
+        ],
+      };
+    }
+
+    await User.update({ id: userIdNum }, { password: await hash(newPassword) });
+
+    req.session.userId = user.id;
+
+    await redis.del(FORGET_PASSWORD_PREFIX + token);
+
+    return { user };
+  }
+
+  @Query(() => [User])
+  users(): Promise<User[]> {
+    return User.find();
+  }
+
+  @Mutation(() => UserResponse)
+  async register(
+    @Arg("options", () => UsernamePasswordInput) options: UsernamePasswordInput,
+    @Ctx() { req }: MyContext
+  ): Promise<UserResponse> {
+    const { username, password, email } = options;
+
+    const errors = validateRegister(options);
+
+    if (errors) {
+      return { errors };
+    }
+
     const hashedPassword = await hash(password);
+
     let user;
     try {
-      const result = await (em as EntityManager)
-        .createQueryBuilder(User)
-        .getKnexQuery()
-        .insert({
-          username,
-          password: hashedPassword,
-          created_at: new Date(),
-          updated_at: new Date(),
-        })
-        .returning("*");
-      user = result[0];
+      const result = await getConnection()
+        .createQueryBuilder()
+        .insert()
+        .into(User)
+        .values({ username, password: hashedPassword, email })
+        .returning("*")
+        .execute();
+      console.log(result);
+      user = result.raw[0];
     } catch (error) {
+      console.log(error);
       const isUsernameTaken = error.code === "23505";
 
       if (isUsernameTaken) {
@@ -94,7 +169,11 @@ export class UserResolver {
           errors: [
             {
               field: "username",
-              message: "username already taken",
+              message: "username or email already taken",
+            },
+            {
+              field: "email",
+              message: "username or email already taken",
             },
           ],
         };
@@ -109,19 +188,22 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg("options", () => UsernamePasswordInput) options: UsernamePasswordInput,
-    @Ctx() { em, req }: MyContext
+    @Arg("usernameOrEmail") usernameOrEmail: string,
+    @Arg("password") password: string,
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
-    const { username, password } = options;
-
-    const user = await em.findOne(User, { username });
+    const user = await User.findOne({
+      where: usernameOrEmail.includes("@")
+        ? { email: usernameOrEmail }
+        : { username: usernameOrEmail },
+    });
 
     if (!user) {
       return {
         errors: [
           {
-            field: "username",
-            message: "username does not exist",
+            field: "usernameOrEmail",
+            message: "username or email does not exist",
           },
         ],
       };
@@ -140,7 +222,7 @@ export class UserResolver {
       };
     }
 
-    await em.persistAndFlush(user);
+    await user.save();
 
     req.session.userId = user.id;
 
@@ -148,14 +230,12 @@ export class UserResolver {
   }
 
   @Query(() => User, { nullable: true })
-  async me(@Ctx() { req, em }: MyContext): Promise<User | null> {
+  me(@Ctx() { req }: MyContext) {
     if (!req.session.userId) {
       return null;
     }
 
-    const user = await em.findOne(User, { id: req.session.userId });
-
-    return user;
+    return User.findOne(req.session.userId);
   }
 
   @Mutation(() => Boolean)

@@ -1,8 +1,9 @@
 import { Box } from "@chakra-ui/layout";
 import React from "react";
 
+export type WrapperVariant = "small" | "regular";
 interface WrapperProps {
-  variant?: "small" | "regular";
+  variant?: WrapperVariant;
 }
 
 export const Wrapper: React.FC<WrapperProps> = ({
@@ -11,7 +12,7 @@ export const Wrapper: React.FC<WrapperProps> = ({
 }) => {
   return (
     <Box
-      maxW={variant === "regular" ? "800px" : "400px"}
+      maxW={variant === "regular" ? "600px" : "400px"}
       width="100%"
       mt={8}
       mx="auto"
