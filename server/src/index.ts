@@ -17,6 +17,7 @@ import { createConnection } from "typeorm";
 import { User } from "./entities/User";
 import { Post } from "./entities/Post";
 import path from "path";
+import { Updoot } from "./entities/Updoot";
 
 const PORT = process.env.PORT || 4000;
 
@@ -29,7 +30,7 @@ const bootstrap = async () => {
     migrations: [path.join(__dirname, "./migrations/*")],
     logging: true,
     synchronize: true,
-    entities: [Post, User],
+    entities: [Post, User, Updoot],
   });
   await conn.runMigrations();
 
