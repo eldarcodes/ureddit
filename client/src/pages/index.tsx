@@ -8,7 +8,7 @@ import { usePostsQuery } from "./../generated/graphql";
 
 const Index = () => {
   const [variables, setVariables] = useState({
-    limit: 33,
+    limit: 15,
     cursor: null as null | string,
   });
 
@@ -35,7 +35,10 @@ const Index = () => {
         <Stack spacing={4}>
           {data!.posts.posts.map((post) => (
             <Box shadow="sm" borderWidth="1px" p={5} key={post.id}>
-              <Heading fontSize="xl">{post.title}</Heading>
+              <Flex justifyContent="space-between">
+                <Heading fontSize="xl">{post.title}</Heading>
+                <Text color="gray">{post.creator.username}</Text>
+              </Flex>
               <Text>{post.textSnippet}</Text>
             </Box>
           ))}

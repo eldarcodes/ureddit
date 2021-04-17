@@ -24,6 +24,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createPost: Post;
   updatePost?: Maybe<Post>;
+  vote: Scalars['Boolean'];
   deletePost: Scalars['Boolean'];
   forgotPassword: Scalars['Boolean'];
   changePassword: UserResponse;
@@ -41,6 +42,12 @@ export type MutationCreatePostArgs = {
 export type MutationUpdatePostArgs = {
   title?: Maybe<Scalars['String']>;
   id: Scalars['Float'];
+};
+
+
+export type MutationVoteArgs = {
+  value: Scalars['Int'];
+  postId: Scalars['Int'];
 };
 
 
@@ -82,6 +89,7 @@ export type Post = {
   creatorId: Scalars['Float'];
   text: Scalars['String'];
   points: Scalars['Float'];
+  creator: User;
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
   title: Scalars['String'];
@@ -252,6 +260,10 @@ export type PostsQuery = (
     & { posts: Array<(
       { __typename?: 'Post' }
       & Pick<Post, 'title' | 'id' | 'createdAt' | 'updatedAt' | 'textSnippet'>
+      & { creator: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'username'>
+      ) }
     )> }
   ) }
 );
@@ -368,6 +380,10 @@ export const PostsDocument = gql`
       createdAt
       updatedAt
       textSnippet
+      creator {
+        id
+        username
+      }
     }
   }
 }
