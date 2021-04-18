@@ -12,6 +12,7 @@ import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
 import React, { useState } from "react";
 import { Layout } from "../components/Layout";
+import { UpdootSection } from "../components/UpdootSection";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { usePostsQuery } from "./../generated/graphql";
 
@@ -26,7 +27,7 @@ const Index = () => {
   });
 
   if (!data && !fetching) {
-    return <div>you got query failer for some reason</div>;
+    return <div>you got query failed for some reason</div>;
   }
 
   return (
@@ -44,23 +45,7 @@ const Index = () => {
         <Stack spacing={4}>
           {data!.posts.posts.map((post) => (
             <Flex shadow="sm" borderWidth="1px" p={5} key={post.id}>
-              <Flex
-                flexDirection="column"
-                alignItems="center"
-                justifyContent="center"
-                flexWrap="nowrap"
-                width="70px"
-              >
-                <IconButton
-                  aria-label="updoot post"
-                  icon={<ChevronUpIcon cursor="pointer" />}
-                />
-                {post.points}
-                <IconButton
-                  aria-label="downdoot post"
-                  icon={<ChevronDownIcon cursor="pointer" />}
-                />
-              </Flex>
+              <UpdootSection post={post} />
               <Flex width="100%" justifyContent="space-between">
                 <Box>
                   <Heading fontSize="xl">{post.title}</Heading>
