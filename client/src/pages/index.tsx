@@ -1,14 +1,24 @@
-import { Box, Button, Flex, Heading, Stack, Text } from "@chakra-ui/react";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  IconButton,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
 import React, { useState } from "react";
 import { Layout } from "../components/Layout";
+import { UpdootSection } from "../components/UpdootSection";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { usePostsQuery } from "./../generated/graphql";
 
 const Index = () => {
   const [variables, setVariables] = useState({
-    limit: 33,
+    limit: 15,
     cursor: null as null | string,
   });
 
@@ -17,7 +27,7 @@ const Index = () => {
   });
 
   if (!data && !fetching) {
-    return <div>you got query failer for some reason</div>;
+    return <div>you got query failed for some reason</div>;
   }
 
   return (
@@ -34,10 +44,16 @@ const Index = () => {
       ) : (
         <Stack spacing={4}>
           {data!.posts.posts.map((post) => (
-            <Box shadow="sm" borderWidth="1px" p={5} key={post.id}>
-              <Heading fontSize="xl">{post.title}</Heading>
-              <Text>{post.textSnippet}</Text>
-            </Box>
+            <Flex shadow="sm" borderWidth="1px" p={5} key={post.id}>
+              <UpdootSection post={post} />
+              <Flex width="100%" justifyContent="space-between">
+                <Box>
+                  <Heading fontSize="xl">{post.title}</Heading>
+                  <Text>{post.textSnippet}</Text>
+                </Box>
+                <Text color="gray">{post.creator.username}</Text>
+              </Flex>
+            </Flex>
           ))}
         </Stack>
       )}
