@@ -31,12 +31,6 @@ const Index = () => {
 
   return (
     <Layout variant="regular">
-      <Flex justifyContent="space-between" mb="5" align="center">
-        <NextLink href="/create-post">
-          <Button>create post</Button>
-        </NextLink>
-      </Flex>
-
       {fetching && !data ? (
         <div>loading...</div>
       ) : (
