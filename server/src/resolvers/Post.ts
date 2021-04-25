@@ -201,8 +201,10 @@ export class PostResolver {
       throw new Error("not authorized");
     }
 
-    await Updoot.delete({ postId: id });
-    await Post.delete({ id });
+    // await Updoot.delete({ postId: id });
+    // await Post.delete({ id });
+
+    await Post.delete({ id, creatorId: userId });
 
     return true;
   }
