@@ -53,10 +53,16 @@ export class PostResolver {
     const realLimitPlusOne = realLimit + 1;
     const userId = req.session.userId;
 
-    const replacements: any[] = [realLimitPlusOne, userId];
+    const replacements: any[] = [realLimitPlusOne];
 
+    if (userId) {
+      replacements.push(userId);
+    }
+
+    let cursorIndex = 3;
     if (cursor) {
       replacements.push(new Date(parseInt(cursor)));
+      cursorIndex = replacements.length;
     }
     const posts = await getConnection().query(
       `
@@ -73,7 +79,7 @@ export class PostResolver {
       }
       from post p
       inner join public.user u on u.id = p."creatorId"      
-      ${cursor ? `where p."createdAt" < $3` : ""}
+      ${cursor ? `where p."createdAt" < $${cursorIndex}` : ""}
       order by p."createdAt" DESC
       limit $1
     `,
@@ -88,7 +94,7 @@ export class PostResolver {
 
   @Query(() => Post, { nullable: true })
   post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
-    return Post.findOne(id);
+    return Post.findOne(id, { relations: ["creator"] });
   }
 
   @Mutation(() => Post)
@@ -180,13 +186,26 @@ export class PostResolver {
   }
 
   @Mutation(() => Boolean)
-  async deletePost(@Arg("id") id: number): Promise<boolean> {
-    try {
-      await Post.delete(id);
-      return true;
-    } catch (error) {
-      console.error(error);
+  async deletePost(
+    @Arg("id", () => Int) id: number,
+    @Ctx() { req }: MyContext
+  ): Promise<boolean> {
+    const post = await Post.findOne(id);
+    const userId = req.session.userId;
+
+    if (!post) {
       return false;
     }
+
+    if (post?.creatorId !== userId) {
+      throw new Error("not authorized");
+    }
+
+    // await Updoot.delete({ postId: id });
+    // await Post.delete({ id });
+
+    await Post.delete({ id, creatorId: userId });
+
+    return true;
   }
 }
