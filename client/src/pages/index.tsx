@@ -1,8 +1,10 @@
+import { DeleteIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
   Flex,
   Heading,
+  IconButton,
   Link,
   Stack,
   Text,
@@ -42,12 +44,23 @@ const Index = () => {
                 <Box>
                   <NextLink href="/post/[id]" as={`/post/${post.id}`}>
                     <Link>
-                      <Heading fontSize="xl">{post.title}</Heading>
+                      <Flex>
+                        <Heading fontSize="xl">{post.title}</Heading>
+                        <Text ml={4} color="gray">
+                          {post.creator.username}
+                        </Text>
+                      </Flex>
                     </Link>
                   </NextLink>
                   <Text>{post.textSnippet}</Text>
                 </Box>
-                <Text color="gray">{post.creator.username}</Text>
+                <Flex align="center">
+                  <IconButton
+                    colorScheme="red"
+                    aria-label="delete post"
+                    icon={<DeleteIcon />}
+                  />
+                </Flex>
               </Flex>
             </Flex>
           ))}
