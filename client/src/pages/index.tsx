@@ -1,10 +1,9 @@
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
   Flex,
   Heading,
-  IconButton,
+  Link,
   Stack,
   Text,
 } from "@chakra-ui/react";
@@ -33,7 +32,6 @@ const Index = () => {
   return (
     <Layout variant="regular">
       <Flex justifyContent="space-between" mb="5" align="center">
-        <Heading>uReddit</Heading>
         <NextLink href="/create-post">
           <Button>create post</Button>
         </NextLink>
@@ -48,7 +46,11 @@ const Index = () => {
               <UpdootSection post={post} />
               <Flex width="100%" justifyContent="space-between">
                 <Box>
-                  <Heading fontSize="xl">{post.title}</Heading>
+                  <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+                    <Link>
+                      <Heading fontSize="xl">{post.title}</Heading>
+                    </Link>
+                  </NextLink>
                   <Text>{post.textSnippet}</Text>
                 </Box>
                 <Text color="gray">{post.creator.username}</Text>

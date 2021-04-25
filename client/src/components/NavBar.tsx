@@ -1,9 +1,10 @@
 import React from "react";
-import { Box, Flex, Link } from "@chakra-ui/layout";
+import { Box, Flex, Heading, Link } from "@chakra-ui/layout";
 import NextLink from "next/link";
 import { useLogoutMutation, useMeQuery } from "./../generated/graphql";
 import { Button } from "@chakra-ui/button";
 import { isServer } from "../utils/isServer";
+import { Wrapper } from "./Wrapper";
 
 interface NavBarProps {}
 
@@ -43,8 +44,17 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
     );
   }
   return (
-    <Flex position="sticky" top={0} zIndex={1} bg="twitter.100" p={4}>
-      <Box ml="auto">{body}</Box>
+    <Flex position="sticky" top={0} m={0} zIndex={1} bg="twitter.100">
+      <Wrapper mt={0}>
+        <Flex alignItems="center" py={3}>
+          <NextLink href="/">
+            <Link>
+              <Heading size="lg">uReddit</Heading>
+            </Link>
+          </NextLink>
+          <Box ml="auto">{body}</Box>
+        </Flex>
+      </Wrapper>
     </Flex>
   );
 };
