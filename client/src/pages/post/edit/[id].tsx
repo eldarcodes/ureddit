@@ -38,7 +38,7 @@ const EditPost: React.FC = () => {
       <Formik
         onSubmit={async (values) => {
           await updatePost({ id: intId, ...values });
-          router.push("/");
+          router.back();
         }}
         initialValues={{ title: data.post.title, text: data.post.text }}
       >
