@@ -1,3 +1,5 @@
+import { cacheExchange, Resolver } from "@urql/exchange-graphcache";
+import Router from "next/router";
 import {
   dedupExchange,
   Exchange,
@@ -5,20 +7,17 @@ import {
   gql,
   stringifyVariables,
 } from "urql";
+import { pipe, tap } from "wonka";
 import {
-  LogoutMutation,
-  MeQuery,
-  MeDocument,
-  LoginMutation,
-  RegisterMutation,
-  VoteMutation,
-  VoteMutationVariables,
   DeletePostMutationVariables,
+  LoginMutation,
+  LogoutMutation,
+  MeDocument,
+  MeQuery,
+  RegisterMutation,
+  VoteMutationVariables,
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
-import { cacheExchange, Resolver } from "@urql/exchange-graphcache";
-import { pipe, tap } from "wonka";
-import Router from "next/router";
 import { isServer } from "./isServer";
 
 export const errorExchange: Exchange = ({ forward }) => (ops$) => {
@@ -71,7 +70,7 @@ const cursorPagination = (): Resolver => {
 export const createUrqlClient = (ssrExchange: any, ctx: any) => {
   let cookie = "";
   if (isServer()) {
-    cookie = ctx.req.headers.cookie;
+    cookie = ctx?.req?.headers?.cookie;
   }
   return {
     url: "http://localhost:4000/graphql",
