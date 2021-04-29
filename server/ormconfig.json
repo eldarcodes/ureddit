@@ -1,0 +1,10 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "username": "mirzabekov",
+  "password": "eldar",
+  "entities": ["dist/entities/*.js"],
+  "migrations": ["dist/migrations/*.js"],
+  "database": "ureddit3"
+}

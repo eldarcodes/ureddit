@@ -30,12 +30,13 @@ const bootstrap = async () => {
     url: process.env.DATABASE_URL,
     migrations: [path.join(__dirname, "./migrations/*")],
     logging: true,
-    synchronize: true,
+    // synchronize: true,
     entities: [Post, User, Updoot],
   });
   await conn.runMigrations();
 
   const app = Express();
+  app.set("proxy", 1);
 
   const RedisStore = connectRedis(session);
   const redis = new Redis(process.env.REDIS_URL);
