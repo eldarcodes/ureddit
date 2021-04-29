@@ -1,3 +1,4 @@
+import { config } from "dotenv-safe";
 import "reflect-metadata";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import Express from "express";
@@ -21,14 +22,12 @@ import { Updoot } from "./entities/Updoot";
 import { createUserLoader } from "./utils/createUserLoader";
 import { createUpdootLoader } from "./utils/createUpdootLoader";
 
-const PORT = process.env.PORT || 4000;
-
+const PORT = parseInt(process.env.PORT) || 4000;
+config();
 const bootstrap = async () => {
   const conn = await createConnection({
     type: "postgres",
-    database: "ureddit2",
-    username: "mirzabekov",
-    password: "eldar",
+    url: process.env.DATABASE_URL,
     migrations: [path.join(__dirname, "./migrations/*")],
     logging: true,
     synchronize: true,
@@ -39,11 +38,11 @@ const bootstrap = async () => {
   const app = Express();
 
   const RedisStore = connectRedis(session);
-  const redis = new Redis();
+  const redis = new Redis(process.env.REDIS_URL);
 
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: process.env.CORS_ORIGIN,
       credentials: true,
     })
   );
@@ -58,10 +57,11 @@ const bootstrap = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
         httpOnly: true,
-        // secure: true,
+        secure: __prod__,
         sameSite: "lax",
+        domain: __prod__ ? "http://161.35.211.105/" : undefined,
       },
-      secret: "06042021_redis_session_secret",
+      secret: process.env.SESSION_SECRET,
       resave: false,
     })
   );
