@@ -1,0 +1,30 @@
+name: Deploy to Netlify
+
+on:
+  push:
+    branches: 
+      - staging
+      - main
+      - dev
+
+jobs:
+  build:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out Git repository
+      uses: actions/checkout@v2
+    
+    - name: Install Node.js, NPM and Yarn
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+      
+    - name: Install dependencies
+      working-directory: ./client
+      run: npm install
+    
+    - name: Build
+      working-directory: ./client
+      run: npm run build
