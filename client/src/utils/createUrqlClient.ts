@@ -1,4 +1,4 @@
-import { cacheExchange, Resolver } from "@urql/exchange-graphcache";
+import { Cache, cacheExchange, Resolver } from "@urql/exchange-graphcache";
 import Router from "next/router";
 import {
   dedupExchange,
@@ -29,6 +29,15 @@ export const errorExchange: Exchange = ({ forward }) => (ops$) => {
       }
     })
   );
+};
+
+const invalidateAllPosts = (cache: Cache) => {
+  const allFields = cache.inspectFields("Query");
+
+  const fieldInfos = allFields.filter((info) => info.fieldName === "posts");
+  fieldInfos.forEach((field) => {
+    cache.invalidate("Query", "posts", field.arguments || {});
+  });
 };
 
 const cursorPagination = (): Resolver => {
@@ -72,8 +81,9 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
   if (isServer()) {
     cookie = ctx?.req?.headers?.cookie;
   }
+
   return {
-    url: "http://localhost:4000/graphql",
+    url: process.env.NEXT_PUBLIC_API_URL as string,
     fetchOptions: {
       credentials: "include" as const,
       headers: cookie
@@ -133,14 +143,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
               }
             },
             createPost: (_result, _, cache) => {
-              const allFields = cache.inspectFields("Query");
-
-              const fieldInfos = allFields.filter(
-                (info) => info.fieldName === "posts"
-              );
-              fieldInfos.forEach((field) => {
-                cache.invalidate("Query", "posts", field.arguments || {});
-              });
+              invalidateAllPosts(cache);
             },
             logout: (_result, _, cache) => {
               betterUpdateQuery<LogoutMutation, MeQuery>(
@@ -169,6 +172,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                   }
                 }
               );
+              invalidateAllPosts(cache);
             },
             register: (_result, _, cache) => {
               betterUpdateQuery<RegisterMutation, MeQuery>(
