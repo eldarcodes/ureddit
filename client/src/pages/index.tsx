@@ -15,6 +15,7 @@ import { Layout } from "../components/Layout";
 import { UpdootSection } from "../components/UpdootSection";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { usePostsQuery } from "./../generated/graphql";
+import Head from "next/head";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -37,6 +38,9 @@ const Index = () => {
 
   return (
     <Layout variant="regular">
+      <Head>
+        <link rel="shortcut icon32" href="/favicon.ico" />
+      </Head>
       {fetching && !data ? (
         <div>loading...</div>
       ) : (
