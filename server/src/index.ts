@@ -36,7 +36,7 @@ const bootstrap = async () => {
   await conn.runMigrations();
 
   const app = Express();
-  app.set("proxy", 1);
+  app.set("trust proxy", 1);
 
   const RedisStore = connectRedis(session);
   const redis = new Redis(process.env.REDIS_URL);
@@ -58,9 +58,9 @@ const bootstrap = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
         httpOnly: true,
-        secure: __prod__,
+        secure: __prod__, // cookie only works in https
         sameSite: "lax",
-        domain: __prod__ ? "http://161.35.211.105/" : undefined,
+        domain: __prod__ ? ".mirzabekov.space" : undefined,
       },
       secret: process.env.SESSION_SECRET,
       resave: false,
