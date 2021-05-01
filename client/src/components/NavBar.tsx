@@ -12,11 +12,11 @@ interface NavBarProps {}
 
 export const NavBar: React.FC<NavBarProps> = ({}) => {
   const router = useRouter();
+  const [logout, { loading: logoutFetching }] = useLogoutMutation();
+  const apolloClient = useApolloClient();
   const { data, loading } = useMeQuery({
     skip: isServer(),
   });
-  const [logout, { loading: logoutFetching }] = useLogoutMutation();
-  const apolloClient = useApolloClient();
 
   let body = null;
 

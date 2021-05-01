@@ -3,11 +3,15 @@ import { Box, Flex, Button, Link } from "@chakra-ui/react";
 import { Formik, Form, FormikHelpers } from "formik";
 import { InputField } from "../../components/InputField";
 import { Wrapper } from "../../components/Wrapper";
-import { useChangePasswordMutation } from "./../../generated/graphql";
+import {
+  MeDocument,
+  MeQuery,
+  useChangePasswordMutation,
+} from "./../../generated/graphql";
 import { toErrorMap } from "../../utils/toErrorMap";
 import { useRouter } from "next/router";
 import NextLink from "next/link";
-import { withApollo } from "../../utils/withApollo";
+import withApollo from "../../utils/withApollo";
 interface Values {
   newPassword: string;
 }
@@ -26,6 +30,16 @@ const ChangePassword: React.FC = () => {
       variables: {
         newPassword: values.newPassword,
         token: typeof router.query.token === "string" ? router.query.token : "",
+      },
+      update: (cache, { data }) => {
+        cache.writeQuery<MeQuery>({
+          query: MeDocument,
+          data: {
+            __typename: "Query",
+            me: data?.changePassword.user,
+          },
+        });
+        cache.evict({ fieldName: "posts" });
       },
     });
     const errors = response.data?.changePassword.errors;
@@ -78,4 +92,4 @@ const ChangePassword: React.FC = () => {
   );
 };
 
-export default withApollo({ ssr: true })(ChangePassword);
+export default withApollo({ ssr: false })(ChangePassword);

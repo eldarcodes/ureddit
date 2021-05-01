@@ -1,11 +1,58 @@
 import React, { useState } from "react";
 import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { Flex, IconButton } from "@chakra-ui/react";
-import { PostSnippetFragment, useVoteMutation } from "../generated/graphql";
+import {
+  PostSnippetFragment,
+  useVoteMutation,
+  VoteMutation,
+} from "../generated/graphql";
+import gql from "graphql-tag";
+import { ApolloCache } from "@apollo/client";
 
 interface UpdootSectionProps {
   post: PostSnippetFragment;
 }
+
+const updateAfterVote = (
+  value: number,
+  postId: number,
+  cache: ApolloCache<VoteMutation>
+) => {
+  const data = cache.readFragment<{
+    id: number;
+    points: number;
+    voteStatus: number | null;
+  }>({
+    id: "Post:" + postId,
+    fragment: gql`
+      fragment _ on Post {
+        id
+        points
+        voteStatus
+      }
+    `,
+  });
+  if (data) {
+    if (data.voteStatus === value) {
+      return;
+    }
+    const newPoints = data.points + (!data.voteStatus ? 1 : 2) * value;
+    cache.writeFragment({
+      id: "Post:" + postId,
+      fragment: gql`
+        fragment _ on Post {
+          points
+          voteStatus
+        }
+      `,
+      data: {
+        id: postId,
+        points: newPoints,
+        voteStatus: value,
+      },
+    });
+  }
+};
 
 export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
   const [loading, setLoading] = useState<
@@ -28,7 +75,10 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
             return;
           }
           setLoading("updoot-loading");
-          await vote({ variables: { postId: post.id, value: 1 } });
+          await vote({
+            variables: { postId: post.id, value: 1 },
+            update: (cache) => updateAfterVote(1, post.id, cache),
+          });
           setLoading("not-loading");
         }}
         colorScheme={post.voteStatus === 1 ? "green" : undefined}
@@ -43,7 +93,10 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
             return;
           }
           setLoading("downdoot-loading");
-          await vote({ variables: { postId: post.id, value: -1 } });
+          await vote({
+            variables: { postId: post.id, value: -1 },
+            update: (cache) => updateAfterVote(-1, post.id, cache),
+          });
           setLoading("not-loading");
         }}
         aria-label="downdoot post"

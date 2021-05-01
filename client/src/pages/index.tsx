@@ -14,7 +14,7 @@ import { Layout } from "../components/Layout";
 import { UpdootSection } from "../components/UpdootSection";
 import { PostQuery, PostsQuery, usePostsQuery } from "./../generated/graphql";
 import Head from "next/head";
-import { withApollo } from "../utils/withApollo";
+import withApollo from "../utils/withApollo";
 
 const Index = () => {
   const { data, loading, error, fetchMore, variables } = usePostsQuery({

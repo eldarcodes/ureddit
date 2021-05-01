@@ -3,7 +3,7 @@ import React from "react";
 import { EditDeletePostButtons } from "../../components/EditDeletePostButtons";
 import { Layout } from "../../components/Layout";
 import { useGetPostFromUrl } from "../../utils/useGetPostFromUrl";
-import { withApollo } from "../../utils/withApollo";
+import withApollo from "../../utils/withApollo";
 
 const Post: React.FC = ({}) => {
   const { data, error, loading } = useGetPostFromUrl();
