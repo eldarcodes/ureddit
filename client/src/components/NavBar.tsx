@@ -6,19 +6,21 @@ import { Button } from "@chakra-ui/button";
 import { isServer } from "../utils/isServer";
 import { Wrapper } from "./Wrapper";
 import { useRouter } from "next/router";
+import { useApolloClient } from "@apollo/client";
 
 interface NavBarProps {}
 
 export const NavBar: React.FC<NavBarProps> = ({}) => {
   const router = useRouter();
-  const [{ data, fetching }] = useMeQuery({
-    pause: isServer(),
+  const [logout, { loading: logoutFetching }] = useLogoutMutation();
+  const apolloClient = useApolloClient();
+  const { data, loading } = useMeQuery({
+    skip: isServer(),
   });
-  const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
 
   let body = null;
 
-  if (fetching) {
+  if (loading) {
     body = "loading...";
   } else if (!data?.me) {
     body = (
@@ -44,7 +46,7 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
           isLoading={logoutFetching}
           onClick={async () => {
             await logout();
-            router.reload();
+            await apolloClient.resetStore();
           }}
           variant="link"
         >

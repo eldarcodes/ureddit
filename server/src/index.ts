@@ -33,7 +33,7 @@ const bootstrap = async () => {
     // synchronize: true,
     entities: [Post, User, Updoot],
   });
-  await conn.runMigrations();
+  // await conn.runMigrations();
 
   const app = Express();
   app.set("trust proxy", 1);

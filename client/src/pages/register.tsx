@@ -3,12 +3,15 @@ import { Form, Formik, FormikHelpers } from "formik";
 import { Box, Button, Flex } from "@chakra-ui/react";
 import { Wrapper } from "../components/Wrapper";
 import { InputField } from "../components/InputField";
-import { useRegisterMutation } from "./../generated/graphql";
+import {
+  MeDocument,
+  MeQuery,
+  useRegisterMutation,
+} from "./../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
 import NextLink from "next/link";
-import { withUrqlClient } from "next-urql";
-import { createUrqlClient } from "../utils/createUrqlClient";
+import withApollo from "../utils/withApollo";
 
 interface RegisterProps {}
 type Values = {
@@ -20,13 +23,24 @@ type Values = {
 const Register: React.FC<RegisterProps> = () => {
   const router = useRouter();
 
-  const [, register] = useRegisterMutation();
+  const [register] = useRegisterMutation();
 
   const handleSubmit = async (
     values: Values,
     { setErrors }: FormikHelpers<Values>
   ) => {
-    const response = await register({ options: values });
+    const response = await register({
+      variables: { options: values },
+      update: (cache, { data }) => {
+        cache.writeQuery<MeQuery>({
+          query: MeDocument,
+          data: {
+            __typename: "Query",
+            me: data?.register.user,
+          },
+        });
+      },
+    });
     const errors = response.data?.register.errors;
     if (errors) {
       setErrors(toErrorMap(errors));
@@ -79,4 +93,4 @@ const Register: React.FC<RegisterProps> = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Register);
+export default withApollo({ ssr: false })(Register);
