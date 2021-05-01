@@ -7,8 +7,6 @@ import { useLoginMutation } from "./../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
 import NextLink from "next/link";
-import { withUrqlClient } from "next-urql";
-import { createUrqlClient } from "../utils/createUrqlClient";
 
 type Values = {
   usernameOrEmail: string;
@@ -18,13 +16,13 @@ type Values = {
 const Login: React.FC<{}> = () => {
   const router = useRouter();
 
-  const [, login] = useLoginMutation();
+  const [login] = useLoginMutation();
 
   const handleSubmit = async (
     values: Values,
     { setErrors }: FormikHelpers<Values>
   ) => {
-    const response = await login(values);
+    const response = await login({ variables: values });
     const errors = response.data?.login.errors;
     if (errors) {
       setErrors(toErrorMap(errors));
@@ -85,4 +83,4 @@ const Login: React.FC<{}> = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Login);
+export default Login;

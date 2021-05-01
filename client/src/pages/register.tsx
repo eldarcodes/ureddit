@@ -7,8 +7,6 @@ import { useRegisterMutation } from "./../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
 import NextLink from "next/link";
-import { withUrqlClient } from "next-urql";
-import { createUrqlClient } from "../utils/createUrqlClient";
 
 interface RegisterProps {}
 type Values = {
@@ -20,13 +18,13 @@ type Values = {
 const Register: React.FC<RegisterProps> = () => {
   const router = useRouter();
 
-  const [, register] = useRegisterMutation();
+  const [register] = useRegisterMutation();
 
   const handleSubmit = async (
     values: Values,
     { setErrors }: FormikHelpers<Values>
   ) => {
-    const response = await register({ options: values });
+    const response = await register({ variables: { options: values } });
     const errors = response.data?.register.errors;
     if (errors) {
       setErrors(toErrorMap(errors));
@@ -79,4 +77,4 @@ const Register: React.FC<RegisterProps> = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Register);
+export default Register;
