@@ -12,7 +12,7 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
     "updoot-loading" | "downdoot-loading" | "not-loading"
   >("not-loading");
 
-  const [, vote] = useVoteMutation();
+  const [vote] = useVoteMutation();
 
   return (
     <Flex
@@ -28,7 +28,7 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
             return;
           }
           setLoading("updoot-loading");
-          await vote({ postId: post.id, value: 1 });
+          await vote({ variables: { postId: post.id, value: 1 } });
           setLoading("not-loading");
         }}
         colorScheme={post.voteStatus === 1 ? "green" : undefined}
@@ -43,7 +43,7 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
             return;
           }
           setLoading("downdoot-loading");
-          await vote({ postId: post.id, value: -1 });
+          await vote({ variables: { postId: post.id, value: -1 } });
           setLoading("not-loading");
         }}
         aria-label="downdoot post"

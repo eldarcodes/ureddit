@@ -7,6 +7,7 @@ import { useChangePasswordMutation } from "./../../generated/graphql";
 import { toErrorMap } from "../../utils/toErrorMap";
 import { useRouter } from "next/router";
 import NextLink from "next/link";
+import { withApollo } from "../../utils/withApollo";
 interface Values {
   newPassword: string;
 }
@@ -77,4 +78,4 @@ const ChangePassword: React.FC = () => {
   );
 };
 
-export default ChangePassword;
+export default withApollo({ ssr: true })(ChangePassword);
