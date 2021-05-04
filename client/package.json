@@ -13,6 +13,8 @@
     "@chakra-ui/react": "^1.0.0",
     "@emotion/react": "^11.0.0",
     "@emotion/styled": "^11.0.0",
+    "@sentry/react": "^6.3.5",
+    "@sentry/tracing": "^6.3.5",
     "@urql/exchange-graphcache": "^4.0.0",
     "formik": "^2.2.6",
     "framer-motion": "^3.10.6",
