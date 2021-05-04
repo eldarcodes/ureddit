@@ -9,11 +9,7 @@
     "build": "tsc",
     "gen-env": "gen-env-types .env -o src/env.d.ts -e .",
     "watch": "tsc -w",
-    "start:node": "ts-node src/index.ts",
-    "dev:node": "nodemon --exec ts-node src/index.ts",
-    "start:main": "node dist/index.js",
-    "dev:main": "nodemon dist/index.js",
-    "dev": "concurrently --kill-others \"yarn dev:main\" \"yarn watch\""
+    "dev": "concurrently --kill-others \"nodemon dist/index.js\" \"yarn watch\""
   },
   "devDependencies": {
     "@types/connect-redis": "^0.0.16",
