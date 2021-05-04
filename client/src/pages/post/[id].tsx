@@ -4,6 +4,7 @@ import { EditDeletePostButtons } from "../../components/EditDeletePostButtons";
 import { Layout } from "../../components/Layout";
 import { useGetPostFromUrl } from "../../utils/useGetPostFromUrl";
 import withApollo from "../../utils/withApollo";
+import Head from "next/head";
 
 const Post: React.FC = ({}) => {
   const { data, error, loading } = useGetPostFromUrl();
@@ -26,6 +27,9 @@ const Post: React.FC = ({}) => {
 
   return (
     <Layout>
+      <Head>
+        <title>Post: {data.post.title} - uReddit</title>
+      </Head>
       <Heading mb={4}>{data.post.title}</Heading>
       <Box mb={3}>{data.post.text}</Box>
       <EditDeletePostButtons

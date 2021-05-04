@@ -38,6 +38,7 @@ const Index = () => {
     <Layout variant="regular">
       <Head>
         <link rel="shortcut icon32" href="/favicon.ico" />
+        <title>uReddit</title>
       </Head>
       {loading && !data ? (
         <div>loading...</div>
