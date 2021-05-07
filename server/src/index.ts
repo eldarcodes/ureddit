@@ -63,6 +63,7 @@ const bootstrap = async () => {
         domain: __prod__ ? ".mirzabekov.space" : undefined,
       },
       secret: process.env.SESSION_SECRET,
+      saveUninitialized: false,
       resave: false,
     })
   );
